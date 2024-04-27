@@ -16,7 +16,7 @@ namespace PokedexAppFF.Services
         {
             foreach (var refresher in _refreshers)
             {
-                _ = refresher.TryRefreshAsync();
+                await refresher.TryRefreshAsync();
             }
         }
     }

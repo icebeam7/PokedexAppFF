@@ -85,8 +85,6 @@ else
     [Parameter]
     public string PokemonMoveFlag { get; set; }
 
-    public MySettings Settings { get; }
-
     //This injects the PokeClient from the dependency injection container
     [Inject]
     PokeApiClient PokeClient { get; set; }
