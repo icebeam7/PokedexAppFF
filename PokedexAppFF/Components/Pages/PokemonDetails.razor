@@ -1,5 +1,5 @@
 ﻿<!--The page directive here specifies that it takes the PokemonName as a parameter-->
-@page "/pokemon/{PokemonName}"
+@page "/pokemon/{PokemonName}/{PokemonMoveFlag}"
 
 @using Microsoft.AspNetCore.Components;
 @using PokeApiNet;
@@ -7,7 +7,11 @@
 @using System.Collections.Generic;
 @using System.Linq;
 @using System.Threading.Tasks;
+@using Microsoft.FeatureManagement;
+@using PokedexAppFF.Services
 
+@inject IFeatureManager FeatureManager
+@inject IConfigRefresherService configRefresher;
 @inject IJSRuntime JS
 
 <!--The onclick attribute here specifies the Method to run in the code-behind file-->
@@ -46,15 +50,20 @@ else
                     </tr>
                 }
             </table>
-            <!--List the moves of the Pokemon-->
-            <strong style="display:block">Moves:</strong>
-            <ul class="list-group">
-                @foreach (var move in Pokemon.Moves)
-                {
-                    <li class="list-group-item">@move.Move.Name</li>
-                }
-            </ul>
+
+            @if (showMoves)
+            {
+                <!--List the moves of the Pokemon-->
+                <strong style="display:block">Moves:</strong>
+                <ul class="list-group">
+                    @foreach (var move in Pokemon.Moves)
+                    {
+                        <li class="list-group-item">@move.Move.Name</li>
+                    }
+                </ul>
+            }
         </div>
+
         <div class="col-6">
             <!--Display the description of the Pokemon-->
             <strong>Description:</strong>
@@ -67,9 +76,16 @@ else
 }
 
 @code{
+    private bool showMoves = false;
+
     //PokemonName is passed as a parameter to this component when it is created
     [Parameter]
     public string PokemonName { get; set; }
+
+    [Parameter]
+    public string PokemonMoveFlag { get; set; }
+
+    public MySettings Settings { get; }
 
     //This injects the PokeClient from the dependency injection container
     [Inject]
@@ -87,6 +103,15 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        if (string.IsNullOrEmpty(PokemonMoveFlag))
+            return;
+
+        if (configRefresher != null)
+        {
+            await configRefresher.RefreshConfiguration();
+            showMoves = await FeatureManager.IsEnabledAsync(PokemonMoveFlag);
+        }
+
         if (Connectivity.Current.NetworkAccess == NetworkAccess.Internet)
         {
             //Create a task for retrieving the basic Pokemon details

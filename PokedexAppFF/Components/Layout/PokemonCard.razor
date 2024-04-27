@@ -27,9 +27,11 @@ else
     [Parameter]
     public Pokemon Pokemon { get; set; }
 
+    string PokemonMoveFlag = "PokemonMoveFlag";
+
     void NavigateToDetails()
     {
-        NavigationManager.NavigateTo($"pokemon/{Pokemon.Name}");
+        NavigationManager.NavigateTo($"pokemon/{Pokemon.Name}/{nameof(PokemonMoveFlag)}");
     }
 
 }
